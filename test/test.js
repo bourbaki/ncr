@@ -1,5 +1,14 @@
 var assert = require("assert")
+var fs = require("fs");
 var ncr = require("../ncr.js")
+
+function processInput(input) {
+    var lines = input.split("\n").slice(1);
+    return lines.map(function (line) {
+        var arr = line.split(' ').map(function (i) {return parseInt(i, 10);});
+        return {n: arr[0], k: arr[1], result: arr[2]};
+    })
+}
 
 describe('ncr', function() {
 	var answer = 64269;
@@ -52,13 +61,6 @@ describe('ncr', function() {
 		})
 	});
 	
-	describe('chooseCRT', function() {
-		it('should return correct value', function () {
-			var result = ncr.chooseCRT(84, 66, factorization);
-			assert.equal(answer, result);
-		})
-	})
-	
 	describe('generalizedLucas', function () {
 		var modulo = factorization[0];
 		it('should exist', function() {
@@ -78,5 +80,33 @@ describe('ncr', function() {
 			assert.equal(11, ncr.modularInverse(5, 27));
 			assert.equal(4, ncr.modularInverse(3, 11));
 		});
+	})
+	
+	describe('chooseCRT', function() {
+		// reading testcases from hackerrank
+		var _read = function (f) {
+			return processInput(fs.readFileSync(f).toString());
+		};
+		
+		var testcases = ['test/testcase-0.txt', 'test/testcase-1.txt'].map(_read);
+		
+		var expecteds = testcases.map(function (suite) {return suite.map(function (ex) {return ex.result;})});
+		
+		var _exHandler = function (ex) {
+			console.log(ex);
+			return ncr.chooseCRT(ex.n, ex.k, factorization);			
+		}
+		
+		it('should return correct value', function () {
+			var result = ncr.chooseCRT(84, 66, factorization);
+			assert.equal(answer, result);
+		})
+		
+		it('should pass Testcase 0 and Testcase 1', function () {
+			var actuals = testcases.map(function (suite) { return suite.map(_exHandler);});
+			assert.deepEqual(expecteds[0], actuals[0]);
+			assert.deepEqual(expecteds[1], actuals[1]);
+		})
+    
 	})
 })
