@@ -20,6 +20,17 @@ function compose(f, g) {
   }
 }
 
+function cachify(f) {
+  var cache = {};
+  return function() {
+    var key = [].slice.call(arguments).join();
+    if(cache[key] === undefined) {
+      return cache[key] = f.apply(null, arguments);
+    } 
+    return cache[key];
+  }
+}
+
 
 
 
@@ -72,6 +83,10 @@ function chooseLucas(n, k, modulo) {
 	}
 
   if(!arr.every(function (e) {return e.n >= e.k;})) return 0;
+  
+  console.log("here");
+  
+  var _cacheChoose = cachify(choose);
 	
 	arr = arr.map(function(e) {return choose(e.n, e.k, modulo);});
 
