@@ -36,6 +36,19 @@ describe('ncr', function() {
 		});
 	})
 	
+	describe('numberOfCarries', function () {
+		it('should exist', function() {
+			assert.equal(true, ncr.hasOwnProperty('numberOfCarries'));
+		});
+		
+		var a = [0, 2, 2];
+		var b = [2, 2, 1];
+		
+		it('should return correct value', function () {
+			assert.equal(2, ncr.numberOfCarries(a, b, 3));
+		})
+	})
+	
 	describe('solveCRT', function() {
 		it('should exist', function() {
 			assert.equal(true, ncr.hasOwnProperty('solveCRT'));
@@ -82,7 +95,7 @@ describe('ncr', function() {
 		});
 	})
 	
-	describe('chooseCRT', function() {
+	describe.only('chooseCRT', function() {
 		// reading testcases from hackerrank
 		var _read = function (f) {
 			return processInput(fs.readFileSync(f).toString());

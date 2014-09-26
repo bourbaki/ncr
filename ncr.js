@@ -1,5 +1,5 @@
 var modulo  = 142857;
-var factorization = [27, 11, 13, 37];
+var factorization = [{prime:3, power:3}, 11, 13, 37];
 
 // FP functions and extensions
 function zip(xs, ys) {
@@ -158,12 +158,13 @@ function solveCRT(ns, as) {
 function factorialPrime(n, p, modulo) {
   var i;
   var result = 1;
-  for (i = 0; i <= n; i += 1) {
+  for (i = 2; i <= n; i += 1) {
     if(i % p !== 0) result = (result * i) % modulo;
   }
   return result;
 }
 function generalizedLucas(n, k, p, q) {
+  
   var r = n - k;
   var pq = Math.pow(p, q);
   var digits = meaningfullDigitsInBase(n, p);
@@ -175,28 +176,32 @@ function generalizedLucas(n, k, p, q) {
     return factorialPrime(e, p, pq);
   }
   
-  var Ns = _generate(n).map(_fp);
-  var Ks = _generate(k).map(_fp);
-  var Rs = _generate(r).map(_fp);
   
   
-  var numerator = Ns.product() % pq;
-  var denominator = Ks.product() * Rs.product() % pq;
+  var Ns = _generate(n);
+  var Ks = _generate(k);
+  var Rs = _generate(r);
+  
+  
+  var numerator = Ns.map(_fp).product() % pq;
+  var denominator = Ks.map(_fp).product() * Rs.map(_fp).product() % pq;
   
   var _tmp = numerator * modularInverse(denominator, pq);
   
+  
   var k_p = baseRepresentation(k, p, digits),
-      n_p = baseRepresentation(n, p, digits);
+      r_p = baseRepresentation(r, p, digits);
   
   
   function _computeE(j) {
-    return zip(n_p, k_p).slice(j).reduce(function (sum, x) { return sum + (x[0] < x[1]);}, 0);
+    return numberOfCarries(k_p, r_p, p, j);
   }
   
   var es = [];
   es[0] = _computeE(0);
   es[q-1] = _computeE(q-1);
   
+  //console.log(es[0] + " " + es[q - 1]);
   return Math.pow(-1, es[q - 1]) * _tmp * Math.pow(p, es[0]) % pq;
  }
  
@@ -205,6 +210,18 @@ function generalizedLucas(n, k, p, q) {
   return extendedEuclid(a, modulo).s;
  }
  
+ function numberOfCarries(a, b, base, j) {
+  var digit = (j === undefined ? 0 : j);
+  var _helper = function (data, pair, i) {
+    var val = (pair[0] + pair[1] + data.carry) >= base;
+    data.carries += (val && (i >= j));
+    data.carry = val;
+    return data;
+  }
+  return zip(a, b).reduce(_helper, {carry: 0, carries: 0}).carries;
+ }
+ 
+exports.numberOfCarries = numberOfCarries;
 exports.modularInverse = modularInverse;
 exports.baseRepresentation = baseRepresentation;
 exports.chooseLucas = chooseLucas;
